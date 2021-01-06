@@ -28,9 +28,15 @@ namespace SmartSchool.API
         {
             services.AddDbContext<DataContext>(
                 context => context.UseSqlServer(Configuration.GetConnectionString("Default"))
-                );
+            );
 
-            services.AddControllers();
+            //services.AddSingleton<IRepository, Repository>(); //Utiliza mesma instância sempre
+            //services.AddTransient<IRepository, Repository>(); //Nunca utiliza a mesma instância
+            services.AddScoped<IRepository, Repository>(); //Nunca utiliza a mesma instância
+
+            services.AddControllers()
+                .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling =
+                Newtonsoft.Json.ReferenceLoopHandling.Ignore); //A parte do Newtonsoft serve para o sistema não ficar em looping infinito nas classes, devido as ligações.
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

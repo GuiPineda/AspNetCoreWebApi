@@ -14,68 +14,73 @@ namespace SmartSchool.API.Controllers
     [ApiController]
     public class ProfessorController : ControllerBase
     {
-        private readonly DataContext _context;
+        private readonly IRepository _repo;
 
-        public ProfessorController(DataContext context)
+        public ProfessorController(DataContext context, IRepository repo)
         {
-            _context = context;
+            _repo = repo;
         }
 
         // GET: api/<ProfessorController>
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(_context.Professores);
+            var result = _repo.GetAllProfessores(true);
+            return Ok(result);
         }
 
         // GET api/<ProfessorController>/5
         [HttpGet("byId/{id}")]
         public IActionResult Get(int id)
         {
-            var professor = _context.Professores.FirstOrDefault(a => a.Id == id);
+            var professor = _repo.GetProfessorById(id);
             if (professor == null) return BadRequest("O Professor não foi encontrado.");
 
             return Ok(professor);
         }
 
-        [HttpGet("ByName/{nome}")]
-        public IActionResult Get(string nome, string sobrenome)
-        {
-            var professor = _context.Professores.FirstOrDefault(a => a.Nome.Contains(nome));
-            if (professor == null) return BadRequest("O Professor não foi encontrado.");
+        //[HttpGet("ByName/{nome}")]
+        //public IActionResult Get(string nome, string sobrenome)
+        //{
+        //    var professor = _context.Professores.FirstOrDefault(a => a.Nome.Contains(nome));
+        //    if (professor == null) return BadRequest("O Professor não foi encontrado.");
 
-            return Ok(professor);
-        }
+        //    return Ok(professor);
+        //}
 
         // POST api/<ProfessorController>
         [HttpPost]
         public IActionResult Post(Professor professor)
         {
-            _context.Add(professor);
-            _context.SaveChanges();
-            return Ok(professor);
+            _repo.Add(professor);
+            if (_repo.SaveChanges())
+            {
+                return Ok(professor);
+            }
+
+            return BadRequest("Falha ao cadastrar professor");
         }
 
         // PUT api/<ProfessorController>/5
         [HttpPut("{id}")]
         public IActionResult Put(int id, Professor professor)
         {
-            var alu = _context.Professores.AsNoTracking().FirstOrDefault(a => a.Id == id);
+            var alu = _repo.GetProfessorById(id, false);
             if (alu == null) return BadRequest("O Professor não foi encontrado.");
 
-            _context.Update(professor);
-            _context.SaveChanges();
+            _repo.Update(professor);
+            _repo.SaveChanges();
             return Ok(professor);
         }
 
         [HttpPatch("{id}")]
         public IActionResult Patch(int id, Professor professor)
         {
-            var alu = _context.Professores.AsNoTracking().FirstOrDefault(a => a.Id == id);
+            var alu = _repo.GetProfessorById(id);
             if (alu == null) return BadRequest("O Professor não foi encontrado.");
 
-            _context.Update(professor);
-            _context.SaveChanges();
+            _repo.Update(professor);
+            _repo.SaveChanges();
             return Ok(professor);
         }
 
@@ -83,11 +88,11 @@ namespace SmartSchool.API.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var professor = _context.Professores.FirstOrDefault(a => a.Id == id);
+            var professor = _repo.GetProfessorById(id);
             if (professor == null) return BadRequest("O Professor não foi encontrado.");
 
-            _context.Remove(professor);
-            _context.SaveChanges();
+            _repo.Delete(professor);
+            _repo.SaveChanges();
             return Ok();
         }
     }
