@@ -26,7 +26,7 @@ namespace SmartSchool.API.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            var result = _repo.GetAllAlunos(true);
+            var result = _repo.GetAllAlunos(true); //teste
             return Ok(result);
         }
 
